@@ -31,7 +31,7 @@ func NewGame() *Game {
 		{Rect: pixel.R(0, 0, WINDOW_WIDTH, 50), Color: colornames.Brown},                           // bottom
 		{Rect: pixel.R(0, WINDOW_HEIGHT-50, WINDOW_WIDTH, WINDOW_HEIGHT), Color: colornames.Brown}, // top
 		{Rect: pixel.R(0, 50, 50, WINDOW_HEIGHT), Color: colornames.Brown},                         // left
-		{Rect: pixel.R(WINDOW_WIDTH-50, 0, WINDOW_WIDTH, WINDOW_HEIGHT), Color: colornames.Brown},  // right
+		// {Rect: pixel.R(WINDOW_WIDTH-50, 0, WINDOW_WIDTH, WINDOW_HEIGHT), Color: colornames.Brown},  // right
 	}
 	return &Game{WindowColor: colornames.Aliceblue, Engine: engine, Platforms: platforms}
 }
@@ -61,6 +61,8 @@ func (g *Game) run() {
 
 	player.Position = win.Bounds().Center() // starts off character middle of screen
 	lastPosition := player.Position
+	camPos := lastPosition // center camera
+
 	last := time.Now()
 	for !win.Closed() {
 		timeDelta := time.Since(last).Seconds()
@@ -88,7 +90,11 @@ func (g *Game) run() {
 		if player.collidesWith(g.Platforms, false) {
 			player.Position = lastPosition
 		}
+
 		player.Matrix = pixel.IM.Scaled(pixel.ZV, 4).Moved(player.Position)
+		camPos = player.Position                                 // make camera follow player
+		cam := pixel.IM.Moved(win.Bounds().Center().Sub(camPos)) // pin to center of screen
+		win.SetMatrix(cam)
 
 		win.Clear(g.WindowColor) // changes window color & also clears window
 
