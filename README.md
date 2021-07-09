@@ -1,2 +1,2 @@
 ## go-topdown
-### Home for a topdown 2D game engine written entirely in GO.
+### Home for a topdown 2D game written entirely in GO.
