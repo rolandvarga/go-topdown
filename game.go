@@ -105,7 +105,7 @@ func (g *Game) run() {
 			}
 		}
 
-		player.setCollision()
+		player.setCollisionBody()
 		if DEBUG_MODE {
 			player.Collider.Draw(imd)
 		}

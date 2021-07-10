@@ -27,7 +27,7 @@ func NewPlayer(playerSheet pixel.Picture) Player {
 	return Player{Sheet: playerSheet, Sprite: sprite, Speed: 500.0}
 }
 
-func (p *Player) setCollision() {
+func (p *Player) setCollisionBody() {
 	p.Collider = NewCollisionObject(pixel.R(
 		p.Position.X-(p.Sprite.Frame().W()+1),
 		p.Position.Y-(p.Sprite.Frame().H()+10),
