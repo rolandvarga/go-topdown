@@ -110,22 +110,20 @@ func (g *Game) run() {
 			player.Collider.Draw(imd)
 		}
 
-		if player.Collider.collidesWith(g.Platforms, false) {
+		if player.Collider.collidesWith(g.Platforms) {
 			player.Position = lastPosition
 		}
 
 		for i := 0; i < len(player.Bullets); i++ {
-			// TODO b.collidesWith(g.Platforms, true)  // delete bullet
-
 			b := player.Bullets[i]
 			player.Bullets[i] = b.update()
 
-			if b.Frames > BULLET_MAX_FRAMES {
-				// remove bullet from slice
+			// if the bullet hits any of the platforms or has reached the maximum
+			// number of allowed frames, delete it
+			if b.collidesWith(g.Platforms) || b.Frames > BULLET_MAX_FRAMES {
 				player.Bullets = append(player.Bullets[:i], player.Bullets[i+1:]...)
 				continue
 			}
-			player.Bullets[i] = b
 		}
 
 		player.Matrix = pixel.IM.Scaled(pixel.ZV, 4).Moved(player.Position)

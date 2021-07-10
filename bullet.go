@@ -58,3 +58,12 @@ func (b *bullet) update() bullet {
 	}
 	return *b
 }
+
+func (b *bullet) collidesWith(platforms []platform) bool {
+	for _, p := range platforms {
+		if p.getRect().Intersects(b.Rect) {
+			return true
+		}
+	}
+	return false
+}

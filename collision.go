@@ -7,7 +7,7 @@ import (
 )
 
 type Collider interface {
-	collidesWith(objects []Collider, delete bool) bool
+	collidesWith(objects []Collider) bool
 }
 
 type CollisionObject struct {
@@ -26,7 +26,7 @@ func (co *CollisionObject) Draw(imd *imdraw.IMDraw) {
 
 // collidesWith provides collision detection between player & platforms. When delete set to true
 // it removes player pixels.
-func (co *CollisionObject) collidesWith(platforms []platform, delete bool) bool {
+func (co *CollisionObject) collidesWith(platforms []platform) bool {
 	for _, p := range platforms {
 		if p.getRect().Intersects(co.Rect) {
 			return true
