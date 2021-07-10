@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/faiface/pixel"
 )
 
@@ -12,9 +10,12 @@ const (
 )
 
 type Player struct {
-	Position pixel.Vec
-	Collider CollisionObject
-	Speed    float64
+	Position  pixel.Vec
+	Collider  CollisionObject
+	Speed     float64
+	Direction int
+
+	Bullets []bullet
 
 	Sheet  pixel.Picture
 	Sprite *pixel.Sprite
@@ -31,7 +32,6 @@ func NewPlayer(playerSheet pixel.Picture) Player {
 func (p *Player) collidesWith(platforms []platform, delete bool) bool {
 	for _, platform := range platforms {
 		if platform.Rect.Intersects(p.Collider.Rect) {
-			fmt.Printf("%v - %v\n", platform.Rect, p.Position)
 			return true
 		}
 	}
@@ -45,4 +45,9 @@ func (p *Player) setCollision() {
 		p.Position.X+p.Sheet.Bounds().W(),
 		p.Position.Y+p.Sheet.Bounds().H(),
 	))
+}
+
+func (p *Player) Shoot(direction int) {
+	bullet := NewBullet(p.Position, direction)
+	p.Bullets = append(p.Bullets, bullet)
 }

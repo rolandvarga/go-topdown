@@ -17,6 +17,16 @@ const (
 	WINDOW_HEIGHT = 768
 
 	DEBUG_MODE = true
+
+	BULLET_MAX_AMOUNT = 5
+	BULLET_MAX_FRAMES = 10
+)
+
+const (
+	LEFT = iota
+	DOWN
+	RIGHT
+	UP
 )
 
 type Game struct {
@@ -51,6 +61,7 @@ func (g *Game) run() {
 	}
 
 	imd := imdraw.New(nil)
+	bulletIMD := imdraw.New(nil)
 
 	// create player
 	playersheet, err := g.Engine.loadPictureAt(g.Engine.Assets["player_0"])
@@ -60,7 +71,9 @@ func (g *Game) run() {
 	player := NewPlayer(playersheet)
 
 	player.Position = win.Bounds().Center() // starts off character middle of screen
+	player.Direction = 2                    // starts facing right
 	lastPosition := player.Position
+
 	camPos := lastPosition // center camera
 
 	last := time.Now()
@@ -71,15 +84,25 @@ func (g *Game) run() {
 		lastPosition = player.Position
 		if win.Pressed(pixelgl.KeyA) {
 			player.Position.X -= player.Speed * timeDelta
+			player.Direction = LEFT
 		}
 		if win.Pressed(pixelgl.KeyD) {
 			player.Position.X += player.Speed * timeDelta
+			player.Direction = RIGHT
 		}
 		if win.Pressed(pixelgl.KeyS) {
 			player.Position.Y -= player.Speed * timeDelta
+			player.Direction = DOWN
 		}
 		if win.Pressed(pixelgl.KeyW) {
 			player.Position.Y += player.Speed * timeDelta
+			player.Direction = UP
+		}
+
+		if win.Pressed(pixelgl.KeySpace) {
+			if len(player.Bullets) < BULLET_MAX_AMOUNT {
+				player.Shoot(player.Direction)
+			}
 		}
 
 		player.setCollision()
@@ -89,6 +112,20 @@ func (g *Game) run() {
 
 		if player.collidesWith(g.Platforms, false) {
 			player.Position = lastPosition
+		}
+
+		for i := 0; i < len(player.Bullets); i++ {
+			// TODO b.collidesWith(g.Platforms, true)  // delete bullet
+
+			b := player.Bullets[i]
+			player.Bullets[i] = b.update()
+
+			if b.Frames > BULLET_MAX_FRAMES {
+				// remove bullet from slice
+				player.Bullets = append(player.Bullets[:i], player.Bullets[i+1:]...)
+				continue
+			}
+			player.Bullets[i] = b
 		}
 
 		player.Matrix = pixel.IM.Scaled(pixel.ZV, 4).Moved(player.Position)
@@ -103,13 +140,21 @@ func (g *Game) run() {
 		for _, p := range g.Platforms {
 			p.draw(imd)
 		}
+
+		for _, b := range player.Bullets {
+			b.draw(bulletIMD)
+		}
+
 		imd.Draw(win)
+		bulletIMD.Draw(win)
 
 		win.Update()
 
 		// clear imd after everything else has been updated in current frame
 		imd.Reset()
 		imd.Clear()
+		bulletIMD.Reset()
+		bulletIMD.Clear()
 	}
 }
 
