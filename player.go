@@ -27,17 +27,6 @@ func NewPlayer(playerSheet pixel.Picture) Player {
 	return Player{Sheet: playerSheet, Sprite: sprite, Speed: 500.0}
 }
 
-// collidesWith provides collision detection between player & platforms. When delete set to true
-// it removes player pixels.
-func (p *Player) collidesWith(platforms []platform, delete bool) bool {
-	for _, platform := range platforms {
-		if platform.Rect.Intersects(p.Collider.Rect) {
-			return true
-		}
-	}
-	return false
-}
-
 func (p *Player) setCollision() {
 	p.Collider = NewCollisionObject(pixel.R(
 		p.Position.X-(p.Sprite.Frame().W()+1),

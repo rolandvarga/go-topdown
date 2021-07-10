@@ -110,7 +110,7 @@ func (g *Game) run() {
 			player.Collider.Draw(imd)
 		}
 
-		if player.collidesWith(g.Platforms, false) {
+		if player.Collider.collidesWith(g.Platforms, false) {
 			player.Position = lastPosition
 		}
 
@@ -138,7 +138,7 @@ func (g *Game) run() {
 		// draw new sprites here
 		player.Sprite.Draw(win, player.Matrix)
 		for _, p := range g.Platforms {
-			p.draw(imd)
+			p.Draw(imd)
 		}
 
 		for _, b := range player.Bullets {
