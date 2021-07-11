@@ -61,7 +61,6 @@ func (g *Game) run() {
 	}
 
 	imd := imdraw.New(nil)
-	bulletIMD := imdraw.New(nil)
 
 	// create player
 	playersheet, err := g.Engine.loadPictureAt(g.Engine.Assets["soldier_movement_sprites"])
@@ -151,19 +150,16 @@ func (g *Game) run() {
 		}
 
 		for _, b := range player.Bullets {
-			b.draw(bulletIMD)
+			b.draw(imd)
 		}
 
 		imd.Draw(win)
-		bulletIMD.Draw(win)
 
 		win.Update()
 
 		// clear imd after everything else has been updated in current frame
 		imd.Reset()
 		imd.Clear()
-		bulletIMD.Reset()
-		bulletIMD.Clear()
 	}
 }
 
