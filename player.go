@@ -46,7 +46,7 @@ func (p *Player) setCollisionBody() {
 	p.Collider = NewCollisionObject(pixel.R(
 		p.Position.X-(p.SpriteMap[p.ActiveFrame].Frame().W()),
 		p.Position.Y-(p.SpriteMap[p.ActiveFrame].Frame().H()+10),
-		p.Position.X+(p.SpriteMap[p.ActiveFrame].Frame().W()-15),
+		p.Position.X+(p.SpriteMap[p.ActiveFrame].Frame().W()-18),
 		p.Position.Y+(p.SpriteMap[p.ActiveFrame].Frame().H()+10),
 	))
 }
