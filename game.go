@@ -43,7 +43,7 @@ func NewGame() *Game {
 		{Rect: pixel.R(0, 50, 50, WINDOW_HEIGHT), Color: colornames.Brown},                         // left
 		// {Rect: pixel.R(WINDOW_WIDTH-50, 0, WINDOW_WIDTH, WINDOW_HEIGHT), Color: colornames.Brown},  // right
 	}
-	return &Game{WindowColor: colornames.Aliceblue, Engine: engine, Platforms: platforms}
+	return &Game{WindowColor: colornames.Gray, Engine: engine, Platforms: platforms}
 }
 
 func (g *Game) run() {
@@ -64,7 +64,7 @@ func (g *Game) run() {
 	bulletIMD := imdraw.New(nil)
 
 	// create player
-	playersheet, err := g.Engine.loadPictureAt(g.Engine.Assets["player_0"])
+	playersheet, err := g.Engine.loadPictureAt(g.Engine.Assets["soldier_movement_sprites"])
 	if err != nil {
 		panic(err)
 	}
@@ -82,23 +82,33 @@ func (g *Game) run() {
 		last = time.Now()
 
 		lastPosition = player.Position
+
 		if win.Pressed(pixelgl.KeyA) {
 			player.Position.X -= player.Speed * timeDelta
 			player.Direction = LEFT
-		}
-		if win.Pressed(pixelgl.KeyD) {
+			player.FrameCount = (player.FrameCount + 1) % 5
+			player.ActiveFrame = 8 + player.FrameCount
+		} else if win.Pressed(pixelgl.KeyD) {
 			player.Position.X += player.Speed * timeDelta
 			player.Direction = RIGHT
-		}
-		if win.Pressed(pixelgl.KeyS) {
+			player.FrameCount = (player.FrameCount + 1) % 5
+			player.ActiveFrame = 2 + player.FrameCount
+		} else if win.Pressed(pixelgl.KeyS) {
 			player.Position.Y -= player.Speed * timeDelta
 			player.Direction = DOWN
-		}
-		if win.Pressed(pixelgl.KeyW) {
+		} else if win.Pressed(pixelgl.KeyW) {
 			player.Position.Y += player.Speed * timeDelta
 			player.Direction = UP
+		} else {
+			if player.Direction == RIGHT {
+				player.ActiveFrame = 1
+				player.FrameCount = 0
+			}
+			if player.Direction == LEFT {
+				player.ActiveFrame = 7
+				player.FrameCount = 0
+			}
 		}
-
 		if win.Pressed(pixelgl.KeySpace) {
 			if len(player.Bullets) < BULLET_MAX_AMOUNT {
 				player.Shoot(player.Direction)
@@ -134,7 +144,8 @@ func (g *Game) run() {
 		win.Clear(g.WindowColor) // changes window color & also clears window
 
 		// draw new sprites here
-		player.Sprite.Draw(win, player.Matrix)
+		player.SpriteMap[player.ActiveFrame].Draw(win, player.Matrix)
+
 		for _, p := range g.Platforms {
 			p.Draw(imd)
 		}

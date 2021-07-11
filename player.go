@@ -5,34 +5,49 @@ import (
 )
 
 const (
-	playerPixelWidth  = 16
-	playerPixelHeight = 16
+	playerPixelWidth  = 20
+	playerPixelHeight = 27
 )
 
 type Player struct {
-	Position  pixel.Vec
-	Collider  CollisionObject
-	Speed     float64
-	Direction int
+	Position    pixel.Vec
+	Collider    CollisionObject
+	Speed       float64
+	Direction   int
+	ActiveFrame int // determines which sprite should be rendered
+	FrameCount  int
 
 	Bullets []bullet
 
-	Sheet  pixel.Picture
-	Sprite *pixel.Sprite
-	Matrix pixel.Matrix
+	Sheet     pixel.Picture
+	SpriteMap map[int]*pixel.Sprite
+	Matrix    pixel.Matrix
 }
 
 func NewPlayer(playerSheet pixel.Picture) Player {
-	sprite := pixel.NewSprite(playerSheet, pixel.R(0, 0, playerPixelWidth, playerPixelHeight))
-	return Player{Sheet: playerSheet, Sprite: sprite, Speed: 500.0}
+	spriteMap := make(map[int]*pixel.Sprite)
+	for i := 0; i < 13; i++ {
+		spriteMap[i] = pixel.NewSprite(playerSheet, pixel.R(
+			float64(playerPixelWidth*(i-1)+2), 0, // Rect Min
+			float64(playerPixelWidth*i+2), playerPixelHeight, // Rect Max
+		))
+	}
+	activeFrame := 1 // start facing right
+
+	return Player{
+		Sheet:       playerSheet,
+		SpriteMap:   spriteMap,
+		ActiveFrame: activeFrame,
+		Speed:       500.0,
+	}
 }
 
 func (p *Player) setCollisionBody() {
 	p.Collider = NewCollisionObject(pixel.R(
-		p.Position.X-(p.Sprite.Frame().W()+1),
-		p.Position.Y-(p.Sprite.Frame().H()+10),
-		p.Position.X+p.Sheet.Bounds().W(),
-		p.Position.Y+p.Sheet.Bounds().H(),
+		p.Position.X-(p.SpriteMap[p.ActiveFrame].Frame().W()),
+		p.Position.Y-(p.SpriteMap[p.ActiveFrame].Frame().H()+10),
+		p.Position.X+(p.SpriteMap[p.ActiveFrame].Frame().W()-15),
+		p.Position.Y+(p.SpriteMap[p.ActiveFrame].Frame().H()+10),
 	))
 }
 
