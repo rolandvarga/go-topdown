@@ -16,10 +16,12 @@ const (
 	WINDOW_WIDTH  = 1024
 	WINDOW_HEIGHT = 768
 
-	DEBUG_MODE = true
+	DEBUG_MODE = false
 
 	BULLET_MAX_AMOUNT = 5
 	BULLET_MAX_FRAMES = 10
+
+	FRAME_DELAY = 5
 )
 
 const (
@@ -75,6 +77,8 @@ func (g *Game) run() {
 
 	camPos := lastPosition // center camera
 
+	framesElapsed := 0
+
 	last := time.Now()
 	for !win.Closed() {
 		timeDelta := time.Since(last).Seconds()
@@ -85,13 +89,21 @@ func (g *Game) run() {
 		if win.Pressed(pixelgl.KeyA) {
 			player.Position.X -= player.Speed * timeDelta
 			player.Direction = LEFT
-			player.FrameCount = (player.FrameCount + 1) % 5
-			player.ActiveFrame = 8 + player.FrameCount
+			if framesElapsed == FRAME_DELAY {
+				player.FrameCount = (player.FrameCount + 1) % 5
+				player.ActiveFrame = 8 + player.FrameCount
+				framesElapsed = 0
+			}
+			framesElapsed++
 		} else if win.Pressed(pixelgl.KeyD) {
 			player.Position.X += player.Speed * timeDelta
 			player.Direction = RIGHT
-			player.FrameCount = (player.FrameCount + 1) % 5
-			player.ActiveFrame = 2 + player.FrameCount
+			if framesElapsed == FRAME_DELAY {
+				player.FrameCount = (player.FrameCount + 1) % 5
+				player.ActiveFrame = 2 + player.FrameCount
+				framesElapsed = 0
+			}
+			framesElapsed++
 		} else if win.Pressed(pixelgl.KeyS) {
 			player.Position.Y -= player.Speed * timeDelta
 			player.Direction = DOWN
@@ -102,10 +114,12 @@ func (g *Game) run() {
 			if player.Direction == RIGHT {
 				player.ActiveFrame = 1
 				player.FrameCount = 0
+				framesElapsed = 0
 			}
 			if player.Direction == LEFT {
 				player.ActiveFrame = 7
 				player.FrameCount = 0
+				framesElapsed = 0
 			}
 		}
 		if win.Pressed(pixelgl.KeySpace) {
