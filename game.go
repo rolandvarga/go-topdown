@@ -31,6 +31,10 @@ const (
 	UP
 )
 
+var (
+	GRAVITY = true
+)
+
 type Game struct {
 	WindowColor color.RGBA
 	Engine      Engine
@@ -86,6 +90,11 @@ func (g *Game) run() {
 
 		lastPosition = player.Position
 
+		// gravity
+		if GRAVITY {
+			player.Position.Y -= 10
+		}
+
 		if win.Pressed(pixelgl.KeyA) {
 			player.Position.X -= player.Speed * timeDelta
 			player.Direction = LEFT
@@ -105,11 +114,11 @@ func (g *Game) run() {
 			}
 			framesElapsed++
 		} else if win.Pressed(pixelgl.KeyS) {
-			player.Position.Y -= player.Speed * timeDelta
-			player.Direction = DOWN
+			// crouch
 		} else if win.Pressed(pixelgl.KeyW) {
-			player.Position.Y += player.Speed * timeDelta
-			player.Direction = UP
+			// jump
+			player.Position.Y += player.Speed * timeDelta * 1.5
+			GRAVITY = true
 		} else {
 			if player.Direction == RIGHT {
 				player.ActiveFrame = 1
@@ -135,6 +144,7 @@ func (g *Game) run() {
 
 		if player.Collider.collidesWith(g.Platforms) {
 			player.Position = lastPosition
+			GRAVITY = false
 		}
 
 		for i := 0; i < len(player.Bullets); i++ {
