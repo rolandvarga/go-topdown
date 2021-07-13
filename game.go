@@ -51,7 +51,7 @@ func NewGame() *Game {
 		// {Rect: pixel.R(WINDOW_WIDTH-50, 0, WINDOW_WIDTH, WINDOW_HEIGHT), Color: colornames.Brown},  // right
 	}
 	enemies := []Enemy{
-		{Rect: pixel.R(WINDOW_WIDTH, 50, WINDOW_WIDTH+150, 250), Color: colornames.Green},
+		NewEnemy(),
 	}
 	return &Game{WindowColor: colornames.Gray, Engine: engine, Platforms: platforms, Enemies: enemies}
 }
@@ -172,7 +172,7 @@ func (g *Game) run() {
 		for i := 0; i < len(g.Enemies); i++ {
 			e := g.Enemies[i]
 			if e.CanSee(player.Position) {
-				g.Enemies[i].Rect = e.MoveTowards(player.Position)
+				g.Enemies[i] = e.MoveTowards(player.Position)
 			}
 		}
 
