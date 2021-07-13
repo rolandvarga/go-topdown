@@ -16,6 +16,8 @@ type Player struct {
 	Direction   int
 	ActiveFrame int // determines which sprite should be rendered
 	FrameCount  int
+	OnGround    bool
+	Jumping     bool
 
 	Bullets []bullet
 

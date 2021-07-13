@@ -39,17 +39,21 @@ type Game struct {
 	WindowColor color.RGBA
 	Engine      Engine
 	Platforms   []platform // TODO parsed tilemap exported from Tiled, and create platform objects based on that
+	Enemies     []Enemy
 }
 
 func NewGame() *Game {
 	engine := newEngine()
 	platforms := []platform{
-		{Rect: pixel.R(0, 0, WINDOW_WIDTH, 50), Color: colornames.Brown},                           // bottom
+		{Rect: pixel.R(0, 0, WINDOW_WIDTH*3, 50), Color: colornames.Brown},                         // bottom
 		{Rect: pixel.R(0, WINDOW_HEIGHT-50, WINDOW_WIDTH, WINDOW_HEIGHT), Color: colornames.Brown}, // top
-		{Rect: pixel.R(0, 50, 50, WINDOW_HEIGHT), Color: colornames.Brown},                         // left
+		{Rect: pixel.R(0, 50, 150, 150), Color: colornames.Brown},                                  // left
 		// {Rect: pixel.R(WINDOW_WIDTH-50, 0, WINDOW_WIDTH, WINDOW_HEIGHT), Color: colornames.Brown},  // right
 	}
-	return &Game{WindowColor: colornames.Gray, Engine: engine, Platforms: platforms}
+	enemies := []Enemy{
+		{Rect: pixel.R(WINDOW_WIDTH, 50, WINDOW_WIDTH+150, 250), Color: colornames.Green},
+	}
+	return &Game{WindowColor: colornames.Gray, Engine: engine, Platforms: platforms, Enemies: enemies}
 }
 
 func (g *Game) run() {
@@ -117,8 +121,12 @@ func (g *Game) run() {
 			// crouch
 		} else if win.Pressed(pixelgl.KeyW) {
 			// jump
-			player.Position.Y += player.Speed * timeDelta * 1.5
-			GRAVITY = true
+			if player.OnGround {
+				player.Position.Y += player.Speed * timeDelta * 35
+				player.Jumping = true
+				player.OnGround = false
+				GRAVITY = true
+			}
 		} else {
 			if player.Direction == RIGHT {
 				player.ActiveFrame = 1
@@ -145,6 +153,8 @@ func (g *Game) run() {
 		if player.Collider.collidesWith(g.Platforms) {
 			player.Position = lastPosition
 			GRAVITY = false
+			player.OnGround = true
+			player.Jumping = false
 		}
 
 		for i := 0; i < len(player.Bullets); i++ {
@@ -156,6 +166,13 @@ func (g *Game) run() {
 			if b.collidesWith(g.Platforms) || b.Frames > BULLET_MAX_FRAMES {
 				player.Bullets = append(player.Bullets[:i], player.Bullets[i+1:]...)
 				continue
+			}
+		}
+
+		for i := 0; i < len(g.Enemies); i++ {
+			e := g.Enemies[i]
+			if e.CanSee(player.Position) {
+				g.Enemies[i].Rect = e.MoveTowards(player.Position)
 			}
 		}
 
@@ -171,6 +188,10 @@ func (g *Game) run() {
 
 		for _, p := range g.Platforms {
 			p.Draw(imd)
+		}
+
+		for _, e := range g.Enemies {
+			e.Draw(imd)
 		}
 
 		for _, b := range player.Bullets {
