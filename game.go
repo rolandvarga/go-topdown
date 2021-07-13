@@ -21,7 +21,7 @@ const (
 	BULLET_MAX_AMOUNT = 5
 	BULLET_MAX_FRAMES = 10
 
-	FRAME_DELAY = 5
+	FRAME_DELAY = 4
 )
 
 const (
@@ -99,8 +99,8 @@ func (g *Game) run() {
 			player.Position.X -= player.Speed * timeDelta
 			player.Direction = LEFT
 			if framesElapsed == FRAME_DELAY {
-				player.FrameCount = (player.FrameCount + 1) % 5
-				player.ActiveFrame = 8 + player.FrameCount
+				player.FrameCount = (player.FrameCount + 1) % 8
+				player.ActiveFrame = 11 + player.FrameCount
 				framesElapsed = 0
 			}
 			framesElapsed++
@@ -108,7 +108,7 @@ func (g *Game) run() {
 			player.Position.X += player.Speed * timeDelta
 			player.Direction = RIGHT
 			if framesElapsed == FRAME_DELAY {
-				player.FrameCount = (player.FrameCount + 1) % 5
+				player.FrameCount = (player.FrameCount + 1) % 8
 				player.ActiveFrame = 2 + player.FrameCount
 				framesElapsed = 0
 			}
@@ -126,7 +126,7 @@ func (g *Game) run() {
 				framesElapsed = 0
 			}
 			if player.Direction == LEFT {
-				player.ActiveFrame = 7
+				player.ActiveFrame = 10
 				player.FrameCount = 0
 				framesElapsed = 0
 			}

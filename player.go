@@ -26,7 +26,7 @@ type Player struct {
 
 func NewPlayer(playerSheet pixel.Picture) Player {
 	spriteMap := make(map[int]*pixel.Sprite)
-	for i := 0; i < 13; i++ {
+	for i := 0; i < 19; i++ {
 		spriteMap[i] = pixel.NewSprite(playerSheet, pixel.R(
 			float64(playerPixelWidth*(i-1)+2), 0, // Rect Min
 			float64(playerPixelWidth*i+2), playerPixelHeight, // Rect Max
