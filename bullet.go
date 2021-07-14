@@ -8,15 +8,15 @@ import (
 	"golang.org/x/image/colornames"
 )
 
-type bullet struct {
+type Bullet struct {
 	Rect      pixel.Rect
 	Direction int
 	Frames    int
 	color     color.RGBA
 }
 
-func NewBullet(position pixel.Vec, direction int) bullet {
-	return bullet{
+func NewBullet(position pixel.Vec, direction int) Bullet {
+	return Bullet{
 		Rect: pixel.R(
 			position.X,
 			position.Y-10,
@@ -31,13 +31,13 @@ func NewBullet(position pixel.Vec, direction int) bullet {
 	}
 }
 
-func (b *bullet) draw(imd *imdraw.IMDraw) {
+func (b *Bullet) draw(imd *imdraw.IMDraw) {
 	imd.Color = b.color
 	imd.Push(b.Rect.Min, b.Rect.Max)
 	imd.Rectangle(0)
 }
 
-func (b *bullet) update() bullet {
+func (b *Bullet) update() Bullet {
 	b.Frames++
 
 	if b.Direction == LEFT {
@@ -59,11 +59,6 @@ func (b *bullet) update() bullet {
 	return *b
 }
 
-func (b *bullet) collidesWith(platforms []platform) bool {
-	for _, p := range platforms {
-		if p.getRect().Intersects(b.Rect) {
-			return true
-		}
-	}
-	return false
+func (b Bullet) collidesWith(coll Collider) bool {
+	return coll.getRect().Intersects(b.Rect)
 }
