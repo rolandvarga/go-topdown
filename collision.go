@@ -7,30 +7,72 @@ import (
 )
 
 type Collider interface {
-	collidesWith(objects []Collider) bool
+	collidesWith(coll Collider) bool
+	getRect() pixel.Rect
 }
 
-type CollisionObject struct {
+type PlayerCollider struct {
 	Rect pixel.Rect
 }
 
-func NewCollisionObject(rect pixel.Rect) CollisionObject {
-	return CollisionObject{Rect: rect}
+func NewPlayerCollider(rect pixel.Rect) PlayerCollider {
+	return PlayerCollider{Rect: rect}
 }
 
-func (co *CollisionObject) Draw(imd *imdraw.IMDraw) {
+func (co PlayerCollider) getRect() pixel.Rect {
+	return co.Rect
+}
+
+func (co PlayerCollider) Draw(imd *imdraw.IMDraw) {
 	imd.Color = colornames.Greenyellow
 	imd.Push(co.Rect.Min, co.Rect.Max)
 	imd.Rectangle(1)
 }
 
-// collidesWith provides collision detection between player & platforms. When delete set to true
-// it removes player pixels.
-func (co *CollisionObject) collidesWith(platforms []platform) bool {
-	for _, p := range platforms {
-		if p.getRect().Intersects(co.Rect) {
-			return true
-		}
-	}
-	return false
+func (co PlayerCollider) collidesWith(coll Collider) bool {
+	return coll.getRect().Intersects(co.Rect)
+}
+
+type EnemyCollider struct {
+	Rect pixel.Rect
+}
+
+func NewEnemyCollider(rect pixel.Rect) EnemyCollider {
+	return EnemyCollider{Rect: rect}
+}
+
+func (co EnemyCollider) getRect() pixel.Rect {
+	return co.Rect
+}
+
+func (co EnemyCollider) Draw(imd *imdraw.IMDraw) {
+	imd.Color = colornames.Greenyellow
+	imd.Push(co.Rect.Min, co.Rect.Max)
+	imd.Rectangle(1)
+}
+
+func (co EnemyCollider) collidesWith(coll Collider) bool {
+	return coll.getRect().Intersects(co.Rect)
+}
+
+type PlatformCollider struct {
+	Rect pixel.Rect
+}
+
+func NewPlatformCollider(rect pixel.Rect) PlatformCollider {
+	return PlatformCollider{Rect: rect}
+}
+
+func (co PlatformCollider) getRect() pixel.Rect {
+	return co.Rect
+}
+
+func (co PlatformCollider) Draw(imd *imdraw.IMDraw) {
+	imd.Color = colornames.Greenyellow
+	imd.Push(co.Rect.Min, co.Rect.Max)
+	imd.Rectangle(1)
+}
+
+func (co PlatformCollider) collidesWith(coll Collider) bool {
+	return coll.getRect().Intersects(co.Rect)
 }
