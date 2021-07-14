@@ -2,6 +2,7 @@ package main
 
 import (
 	"image/color"
+	"math"
 	"time"
 
 	_ "image/png"
@@ -21,7 +22,11 @@ const (
 	BULLET_MAX_AMOUNT = 5
 	BULLET_MAX_FRAMES = 10
 
-	FRAME_DELAY = 4
+	RUN_FRAME_DELAY     = 4
+	RUN_MOVEMENT_SPEED  = 500
+	JUMP_FRAME_DELAY    = 2
+	JUMP_FRAMES_MAX     = 10
+	JUMP_MOVEMENT_SPEED = 2200
 )
 
 const (
@@ -80,13 +85,16 @@ func (g *Game) run() {
 	player := NewPlayer(playersheet)
 
 	player.Position = win.Bounds().Center() // starts off character middle of screen
-	player.Direction = 2                    // starts facing right
+	player.Direction = RIGHT                // starts facing right
 	lastPosition := player.Position
 
 	camPos := lastPosition // center camera
 
-	framesElapsed := 0
+	elapsedFramesRun := 0
+	elapsedFramesJump := 0
+	totalFramesJump := 0
 
+	// game loop
 	last := time.Now()
 	for !win.Closed() {
 		timeDelta := time.Since(last).Seconds()
@@ -100,43 +108,51 @@ func (g *Game) run() {
 		}
 
 		if win.Pressed(pixelgl.KeyA) {
-			player.Position.X -= player.Speed * timeDelta
+			player.Position.X -= RUN_MOVEMENT_SPEED * timeDelta
 			player.Direction = LEFT
-			if framesElapsed == FRAME_DELAY {
+			if elapsedFramesRun == RUN_FRAME_DELAY {
 				player.FrameCount = (player.FrameCount + 1) % 8
 				player.ActiveFrame = 11 + player.FrameCount
-				framesElapsed = 0
+				elapsedFramesRun = 0
 			}
-			framesElapsed++
+			elapsedFramesRun++
 		} else if win.Pressed(pixelgl.KeyD) {
-			player.Position.X += player.Speed * timeDelta
+			player.Position.X += RUN_MOVEMENT_SPEED * timeDelta
 			player.Direction = RIGHT
-			if framesElapsed == FRAME_DELAY {
+			if elapsedFramesRun == RUN_FRAME_DELAY {
 				player.FrameCount = (player.FrameCount + 1) % 8
 				player.ActiveFrame = 2 + player.FrameCount
-				framesElapsed = 0
+				elapsedFramesRun = 0
 			}
-			framesElapsed++
+			elapsedFramesRun++
 		} else if win.Pressed(pixelgl.KeyS) {
 			// crouch
-		} else if win.Pressed(pixelgl.KeyW) {
-			// jump
-			if player.OnGround {
-				player.Position.Y += player.Speed * timeDelta * 35
-				player.Jumping = true
-				player.OnGround = false
-				GRAVITY = true
-			}
 		} else {
 			if player.Direction == RIGHT {
 				player.ActiveFrame = 1
 				player.FrameCount = 0
-				framesElapsed = 0
+				elapsedFramesRun = 0
 			}
 			if player.Direction == LEFT {
 				player.ActiveFrame = 10
 				player.FrameCount = 0
-				framesElapsed = 0
+				elapsedFramesRun = 0
+			}
+		}
+		if win.Pressed(pixelgl.KeyJ) {
+			// jump
+			if player.OnGround {
+				player.Jumping = true
+				player.OnGround = false
+				GRAVITY = true
+
+				switch player.Direction {
+				case LEFT:
+					player.ActiveFrame = 11
+				case RIGHT:
+					player.ActiveFrame = 2
+				}
+				player.Position.Y += JUMP_MOVEMENT_SPEED * timeDelta
 			}
 		}
 		if win.Pressed(pixelgl.KeySpace) {
@@ -155,6 +171,19 @@ func (g *Game) run() {
 			GRAVITY = false
 			player.OnGround = true
 			player.Jumping = false
+			totalFramesJump = 0
+			elapsedFramesJump = 0
+		}
+
+		if player.Jumping {
+			if totalFramesJump >= JUMP_FRAMES_MAX {
+				player.Position.Y = math.Max(player.Position.Y-JUMP_MOVEMENT_SPEED*timeDelta, 0)
+			}
+			if elapsedFramesJump >= JUMP_FRAME_DELAY {
+				player.Position.Y += JUMP_MOVEMENT_SPEED * timeDelta
+			}
+			totalFramesJump++
+			elapsedFramesJump++
 		}
 
 		for i := 0; i < len(player.Bullets); i++ {

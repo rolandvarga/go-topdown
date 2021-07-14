@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	ENEMY_VISION = 400
-	ENEMY_SPEED  = 5
+	ENEMY_VISION_RANGE   = 400
+	ENEMY_MOVEMENT_SPEED = 5
 )
 
 type Enemy struct {
@@ -45,7 +45,7 @@ func (e *Enemy) Draw(imd *imdraw.IMDraw) {
 }
 
 func (e *Enemy) CanSee(player pixel.Vec) bool {
-	return e.Rect.Center().To(player).Len() <= ENEMY_VISION
+	return e.Rect.Center().To(player).Len() <= ENEMY_VISION_RANGE
 }
 
 func (e Enemy) MoveTowards(player pixel.Vec) Enemy {
@@ -59,8 +59,8 @@ func (e Enemy) MoveTowards(player pixel.Vec) Enemy {
 	direction.Y = direction.Y / hyp
 
 	// update position AND rect
-	e.Position.X += direction.X * ENEMY_SPEED
-	e.Position.Y += direction.Y * ENEMY_SPEED
+	e.Position.X += direction.X * ENEMY_MOVEMENT_SPEED
+	e.Position.Y += direction.Y * ENEMY_MOVEMENT_SPEED
 
 	e.Rect.Min = e.Position
 	e.Rect.Max = e.Position.Add(e.Size)

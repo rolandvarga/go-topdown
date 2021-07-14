@@ -5,14 +5,13 @@ import (
 )
 
 const (
-	playerPixelWidth  = 20
-	playerPixelHeight = 27
+	PLAYER_PIXEL_WIDTH  = 20
+	PLAYER_PIXEL_HEIGHT = 27
 )
 
 type Player struct {
 	Position    pixel.Vec
 	Collider    CollisionObject
-	Speed       float64
 	Direction   int
 	ActiveFrame int // determines which sprite should be rendered
 	FrameCount  int
@@ -30,8 +29,8 @@ func NewPlayer(playerSheet pixel.Picture) Player {
 	spriteMap := make(map[int]*pixel.Sprite)
 	for i := 0; i < 19; i++ {
 		spriteMap[i] = pixel.NewSprite(playerSheet, pixel.R(
-			float64(playerPixelWidth*(i-1)+2), 0, // Rect Min
-			float64(playerPixelWidth*i+2), playerPixelHeight, // Rect Max
+			float64(PLAYER_PIXEL_WIDTH*(i-1)+2), 0, // Rect Min
+			float64(PLAYER_PIXEL_WIDTH*i+2), PLAYER_PIXEL_HEIGHT, // Rect Max
 		))
 	}
 	activeFrame := 1 // start facing right
@@ -40,7 +39,6 @@ func NewPlayer(playerSheet pixel.Picture) Player {
 		Sheet:       playerSheet,
 		SpriteMap:   spriteMap,
 		ActiveFrame: activeFrame,
-		Speed:       500.0,
 	}
 }
 
