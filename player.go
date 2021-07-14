@@ -11,14 +11,15 @@ const (
 
 type Player struct {
 	Position    pixel.Vec
-	Collider    CollisionObject
+	Collider    PlayerCollider
 	Direction   int
 	ActiveFrame int // determines which sprite should be rendered
 	FrameCount  int
 	OnGround    bool
 	Jumping     bool
 
-	Bullets []bullet
+	Health  int
+	Bullets []Bullet
 
 	Sheet     pixel.Picture
 	SpriteMap map[int]*pixel.Sprite
@@ -42,8 +43,8 @@ func NewPlayer(playerSheet pixel.Picture) Player {
 	}
 }
 
-func (p *Player) setCollisionBody() {
-	p.Collider = NewCollisionObject(pixel.R(
+func (p *Player) updateCollisionBody() PlayerCollider {
+	return NewPlayerCollider(pixel.R(
 		p.Position.X-(p.SpriteMap[p.ActiveFrame].Frame().W()),
 		p.Position.Y-(p.SpriteMap[p.ActiveFrame].Frame().H()+10),
 		p.Position.X+(p.SpriteMap[p.ActiveFrame].Frame().W()-18),
@@ -51,7 +52,6 @@ func (p *Player) setCollisionBody() {
 	))
 }
 
-func (p *Player) Shoot(direction int) {
-	bullet := NewBullet(p.Position, direction)
-	p.Bullets = append(p.Bullets, bullet)
+func (p *Player) Shoot(direction int) Bullet {
+	return NewBullet(p.Position, direction)
 }
