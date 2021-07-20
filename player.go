@@ -1,57 +1,48 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/faiface/pixel"
 )
 
 const (
-	PLAYER_PIXEL_WIDTH  = 20
-	PLAYER_PIXEL_HEIGHT = 27
+	playerPixelWidth  = 16
+	playerPixelHeight = 16
 )
 
 type Player struct {
-	Position    pixel.Vec
-	Collider    PlayerCollider
-	Direction   int
-	ActiveFrame int // determines which sprite should be rendered
-	FrameCount  int
-	OnGround    bool
-	Jumping     bool
+	Position pixel.Vec
+	Collider CollisionObject
+	Speed    float64
 
-	Health  int
-	Bullets []Bullet
-
-	Sheet     pixel.Picture
-	SpriteMap map[int]*pixel.Sprite
-	Matrix    pixel.Matrix
+	Sheet  pixel.Picture
+	Sprite *pixel.Sprite
+	Matrix pixel.Matrix
 }
 
 func NewPlayer(playerSheet pixel.Picture) Player {
-	spriteMap := make(map[int]*pixel.Sprite)
-	for i := 0; i < 19; i++ {
-		spriteMap[i] = pixel.NewSprite(playerSheet, pixel.R(
-			float64(PLAYER_PIXEL_WIDTH*(i-1)+2), 0, // Rect Min
-			float64(PLAYER_PIXEL_WIDTH*i+2), PLAYER_PIXEL_HEIGHT, // Rect Max
-		))
-	}
-	activeFrame := 1 // start facing right
-
-	return Player{
-		Sheet:       playerSheet,
-		SpriteMap:   spriteMap,
-		ActiveFrame: activeFrame,
-	}
+	sprite := pixel.NewSprite(playerSheet, pixel.R(0, 0, playerPixelWidth, playerPixelHeight))
+	return Player{Sheet: playerSheet, Sprite: sprite, Speed: 500.0}
 }
 
-func (p *Player) updateCollisionBody() PlayerCollider {
-	return NewPlayerCollider(pixel.R(
-		p.Position.X-(p.SpriteMap[p.ActiveFrame].Frame().W()),
-		p.Position.Y-(p.SpriteMap[p.ActiveFrame].Frame().H()+10),
-		p.Position.X+(p.SpriteMap[p.ActiveFrame].Frame().W()-18),
-		p.Position.Y+(p.SpriteMap[p.ActiveFrame].Frame().H()+10),
+// collidesWith provides collision detection between player & platforms. When delete set to true
+// it removes player pixels.
+func (p *Player) collidesWith(platforms []platform, delete bool) bool {
+	for _, platform := range platforms {
+		if platform.Rect.Intersects(p.Collider.Rect) {
+			fmt.Printf("%v - %v\n", platform.Rect, p.Position)
+			return true
+		}
+	}
+	return false
+}
+
+func (p *Player) setCollision() {
+	p.Collider = NewCollisionObject(pixel.R(
+		p.Position.X-(p.Sprite.Frame().W()+1),
+		p.Position.Y-(p.Sprite.Frame().H()+10),
+		p.Position.X+p.Sheet.Bounds().W(),
+		p.Position.Y+p.Sheet.Bounds().H(),
 	))
-}
-
-func (p *Player) Shoot(direction int) Bullet {
-	return NewBullet(p.Position, direction)
 }
