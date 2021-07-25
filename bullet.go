@@ -8,15 +8,40 @@ import (
 	"golang.org/x/image/colornames"
 )
 
+const (
+	BULLET_PIXEL_WIDTH  = 49
+	BULLET_PIXEL_HEIGHT = 27
+)
+
 type Bullet struct {
-	Rect      pixel.Rect
-	Direction int
-	Frames    int
-	color     color.RGBA
+	Position    pixel.Vec
+	Rect        pixel.Rect
+	Direction   int
+	ActiveFrame int // determines which sprite should be rendered
+	Frames      int
+	color       color.RGBA
+
+	Sheet     pixel.Picture
+	SpriteMap map[int]*pixel.Sprite
+	Matrix    pixel.Matrix
 }
 
-func NewBullet(position pixel.Vec, direction int) Bullet {
+func NewBullet(position pixel.Vec, direction int, bulletSheet pixel.Picture) Bullet {
+	spriteMap := make(map[int]*pixel.Sprite)
+	for i := 0; i < 19; i++ {
+		spriteMap[i] = pixel.NewSprite(bulletSheet, pixel.R(
+			float64(BULLET_PIXEL_WIDTH*(i-1)+2), 0, // Rect Min
+			float64(BULLET_PIXEL_WIDTH*i+2), BULLET_PIXEL_HEIGHT, // Rect Max
+		))
+	}
+	switch direction {
+	case LEFT:
+		position.X -= 139
+	case RIGHT:
+		position.X += 125
+	}
 	return Bullet{
+		Position: position,
 		Rect: pixel.R(
 			position.X,
 			position.Y-10,
@@ -25,7 +50,10 @@ func NewBullet(position pixel.Vec, direction int) Bullet {
 		),
 		Direction: direction,
 
-		Frames: 0, // kill after N number of frames
+		Sheet:       bulletSheet,
+		SpriteMap:   spriteMap,
+		ActiveFrame: 1,
+		Frames:      0, // kill after N number of frames
 
 		color: colornames.Blueviolet,
 	}
@@ -39,6 +67,7 @@ func (b *Bullet) draw(imd *imdraw.IMDraw) {
 
 func (b *Bullet) update() Bullet {
 	b.Frames++
+	b.ActiveFrame++
 
 	if b.Direction == LEFT {
 		b.Rect.Min = pixel.V(b.Rect.Min.X-20, b.Rect.Min.Y)

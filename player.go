@@ -21,12 +21,13 @@ type Player struct {
 	Health  int
 	Bullets []Bullet
 
-	Sheet     pixel.Picture
-	SpriteMap map[int]*pixel.Sprite
-	Matrix    pixel.Matrix
+	PlayerSheet pixel.Picture
+	BulletSheet pixel.Picture
+	SpriteMap   map[int]*pixel.Sprite
+	Matrix      pixel.Matrix
 }
 
-func NewPlayer(playerSheet pixel.Picture) Player {
+func NewPlayer(playerSheet, bulletSheet pixel.Picture) Player {
 	spriteMap := make(map[int]*pixel.Sprite)
 	for i := 0; i < 19; i++ {
 		spriteMap[i] = pixel.NewSprite(playerSheet, pixel.R(
@@ -37,7 +38,8 @@ func NewPlayer(playerSheet pixel.Picture) Player {
 	activeFrame := 1 // start facing right
 
 	return Player{
-		Sheet:       playerSheet,
+		PlayerSheet: playerSheet,
+		BulletSheet: bulletSheet,
 		SpriteMap:   spriteMap,
 		ActiveFrame: activeFrame,
 	}
@@ -53,5 +55,5 @@ func (p *Player) updateCollisionBody() PlayerCollider {
 }
 
 func (p *Player) Shoot(direction int) Bullet {
-	return NewBullet(p.Position, direction)
+	return NewBullet(p.Position, direction, p.BulletSheet)
 }

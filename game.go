@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"image/color"
 	"math"
 	"time"
@@ -78,11 +77,15 @@ func (g *Game) run() {
 	imd := imdraw.New(nil)
 
 	// create player
-	playersheet, err := g.Engine.loadPictureAt(g.Engine.Assets["soldier_movement_sprites"])
+	playerSheet, err := g.Engine.loadPictureAt(g.Engine.Assets["soldier_movement_sprites"])
 	if err != nil {
 		panic(err)
 	}
-	player := NewPlayer(playersheet)
+	bulletSheet, err := g.Engine.loadPictureAt(g.Engine.Assets["soldier_bullet_sprites"])
+	if err != nil {
+		panic(err)
+	}
+	player := NewPlayer(playerSheet, bulletSheet)
 
 	player.Position = win.Bounds().Center() // starts off character middle of screen
 	player.Direction = RIGHT                // starts facing right
@@ -163,6 +166,12 @@ func (g *Game) run() {
 		if win.Pressed(pixelgl.KeySpace) {
 			if len(player.Bullets) < BULLET_MAX_AMOUNT {
 				bullet := player.Shoot(player.Direction)
+				switch player.Direction {
+				case LEFT:
+					bullet.ActiveFrame = 11
+				case RIGHT:
+					bullet.ActiveFrame = 1
+				}
 				player.Bullets = append(player.Bullets, bullet)
 			}
 		}
@@ -230,7 +239,6 @@ func (g *Game) run() {
 				if b.collidesWith(e.Collider) {
 					g.Enemies[i].Health--
 					player.Bullets = removeBulletAt(i, player.Bullets)
-					fmt.Println("CURRENT HEALTH: ", g.Enemies[i].Health)
 					continue
 				}
 			}
@@ -266,7 +274,8 @@ func (g *Game) run() {
 		}
 
 		for _, b := range player.Bullets {
-			b.draw(imd)
+			b.Matrix = pixel.IM.Scaled(pixel.ZV, 4).Moved(b.Position)
+			b.SpriteMap[b.ActiveFrame].Draw(win, b.Matrix)
 		}
 
 		imd.Draw(win)
